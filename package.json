@@ -1,0 +1,214 @@
+{
+  "name": "neugul-usage",
+  "displayName": "Neugul Usage — Codex & Claude Code",
+  "description": "Codex CLI와 Claude Code의 남은 사용량을 부드러운 게이지로 보여줍니다.",
+  "version": "0.0.1",
+  "publisher": "TODO-publisher",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other",
+    "Visualization"
+  ],
+  "keywords": [
+    "codex",
+    "claude code",
+    "usage",
+    "rate limit",
+    "status bar"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "neugulUsage",
+          "title": "Neugul Usage",
+          "icon": "media/activity-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "neugulUsage": [
+        {
+          "id": "neugulUsage.panel",
+          "name": "Agent Usage",
+          "type": "webview"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "neugulUsage.refresh",
+        "title": "Neugul: 사용량 새로고침",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "neugulUsage.showPanel",
+        "title": "Neugul: 사용량 패널 열기"
+      },
+      {
+        "command": "neugulUsage.selectAgent",
+        "title": "Neugul: 에이전트 선택"
+      },
+      {
+        "command": "neugulUsage.installClaudeBridge",
+        "title": "Neugul: Claude Code 연동"
+      },
+      {
+        "command": "neugulUsage.uninstallClaudeBridge",
+        "title": "Neugul: Claude Code 연동 해제"
+      },
+      {
+        "command": "neugulUsage.showLogs",
+        "title": "Neugul: 로그 보기"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "neugulUsage.refresh",
+          "when": "view == neugulUsage.panel",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Neugul Usage",
+      "properties": {
+        "neugulUsage.agent": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "codex",
+            "claude",
+            "both"
+          ],
+          "default": "auto",
+          "description": "표시할 에이전트. auto는 최근에 사용한 쪽을 자동으로 선택합니다."
+        },
+        "neugulUsage.primaryWindow": {
+          "type": "string",
+          "enum": [
+            "fiveHour",
+            "longTerm"
+          ],
+          "default": "fiveHour",
+          "description": "캐릭터가 따라가는 기준 게이지."
+        },
+        "neugulUsage.refreshIntervalMs": {
+          "type": "number",
+          "default": 5000,
+          "minimum": 1000,
+          "description": "폴링 주기(ms). 파일 변경 감지가 실패할 때의 보조 수단입니다."
+        },
+        "neugulUsage.staleAfterMinutes": {
+          "type": "number",
+          "default": 30,
+          "minimum": 1,
+          "description": "이 시간 동안 갱신이 없으면 유휴 상태로 표시합니다."
+        },
+        "neugulUsage.statusBar.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "상태바에 게이지를 표시합니다."
+        },
+        "neugulUsage.statusBar.alignment": {
+          "type": "string",
+          "enum": [
+            "left",
+            "right"
+          ],
+          "default": "right",
+          "description": "상태바 아이템 정렬."
+        },
+        "neugulUsage.statusBar.priority": {
+          "type": "number",
+          "default": 100,
+          "description": "상태바 아이템 우선순위. 클수록 왼쪽에 놓입니다."
+        },
+        "neugulUsage.statusBar.width": {
+          "type": "number",
+          "default": 10,
+          "minimum": 4,
+          "maximum": 30,
+          "description": "상태바 블록 게이지 칸 수."
+        },
+        "neugulUsage.statusBar.showMood": {
+          "type": "boolean",
+          "default": true,
+          "description": "상태바에 무드 이모지를 표시합니다."
+        },
+        "neugulUsage.animation": {
+          "type": "string",
+          "enum": [
+            "full",
+            "subtle",
+            "off"
+          ],
+          "default": "full",
+          "description": "캐릭터 애니메이션 강도."
+        },
+        "neugulUsage.moodThresholds": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "default": [
+            90,
+            65,
+            40,
+            20,
+            5
+          ],
+          "description": "무드 경계값(잔여율 기준, 내림차순 5개). ecstatic/happy/neutral/worried/panic/exhausted 순서로 구간이 나뉩니다."
+        },
+        "neugulUsage.notifyAtRemaining": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "default": [
+            20,
+            5
+          ],
+          "description": "잔여율이 이 값 아래로 처음 내려갈 때 알림을 표시합니다. 빈 배열이면 알리지 않습니다."
+        },
+        "neugulUsage.codex.homeDir": {
+          "type": "string",
+          "default": "",
+          "description": "Codex 홈 디렉터리. 비우면 CODEX_HOME 또는 ~/.codex 를 사용합니다."
+        },
+        "neugulUsage.claude.configDir": {
+          "type": "string",
+          "default": "",
+          "description": "Claude Code 설정 디렉터리. 비우면 CLAUDE_CONFIG_DIR 또는 ~/.claude 를 사용합니다."
+        },
+        "neugulUsage.claude.fallbackTokenLimit": {
+          "type": "number",
+          "default": 0,
+          "description": "브리지를 쓸 수 없을 때 JSONL 기반 추정에 사용할 5시간 토큰 한도. 0이면 추정 모드를 끕니다."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "package": "node esbuild.mjs --production",
+    "typecheck": "tsc --noEmit",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test",
+    "vscode:prepublish": "npm run package"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/vscode": "^1.90.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.0"
+  }
+}
