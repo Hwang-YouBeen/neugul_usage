@@ -64,7 +64,7 @@ export class UsageViewProvider implements vscode.WebviewViewProvider, vscode.Dis
       case 'openSettings':
         void vscode.commands.executeCommand(
           'workbench.action.openSettings',
-          '@ext:TODO-publisher.neugul-usage'
+          '@ext:captainneugul.neugul-usage'
         );
         break;
       default:
